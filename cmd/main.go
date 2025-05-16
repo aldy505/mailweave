@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"os"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -46,6 +47,7 @@ func main() {
 	var config Config
 	err := envconfig.Process("", &config)
 	if err != nil {
-		slog.ErrorContext(context.Background())
+		slog.ErrorContext(context.Background(), "failed to process config", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 }
