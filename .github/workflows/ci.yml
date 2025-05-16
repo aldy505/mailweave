@@ -22,7 +22,7 @@ jobs:
       - run: go test -v -coverprofile=coverage.out -covermode=atomic ./...
       - uses: codecov/codecov-action@v5
         with:
-          files: ./backend/coverage.out
+          files: ./coverage.out
           flags: backend
           token: ${{ secrets.CODECOV_TOKEN }}
 
