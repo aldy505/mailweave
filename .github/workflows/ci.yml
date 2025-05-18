@@ -30,11 +30,97 @@ jobs:
     name: Frontend
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    working-directory: ./static
+    defaults:
+      run:
+        working-directory: ./static
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.15'
       - run: npm ci
       - run: npm run build
+
+  build-binary:
+    name: Build Binary
+    if: ${{ github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    needs:
+      - backend
+      - frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.15'
+      - run: npm ci
+        working-directory: ./static
+      - run: npm run build
+        working-directory: ./static
+      - run: GOOS=linux GOARCH=amd64 go build -o mailweave-linux-amd64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=linux GOARCH=arm64 go build -o mailweave-linux-arm64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=linux GOARCH=riscv64 go build -o mailweave-linux-riscv64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=linux GOARCH=arm go build -o mailweave-linux-arm -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=linux GOARCH=ppc64le go build -o mailweave-linux-ppc64le -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=linux GOARCH=s390x go build -o mailweave-linux-s390x -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=freebsd GOARCH=amd64 go build -o mailweave-freebsd-amd64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=freebsd GOARCH=arm64 go build -o mailweave-freebsd-arm64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - run: GOOS=freebsd GOARCH=riscv64 go build -o mailweave-freebsd-riscv64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
+      - uses: actions/upload-artifact@v4
+        with:
+          path: |
+            mailweave-linux-amd64
+            mailweave-linux-arm64
+            mailweave-linux-riscv64
+            mailweave-linux-arm
+            mailweave-linux-ppc64le
+            mailweave-linux-s390x
+            mailweave-freebsd-amd64
+            mailweave-freebsd-arm64
+            mailweave-freebsd-riscv64
+
+  build-docker:
+    name: Build Docker
+    if: ${{ github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    needs:
+      - backend
+      - frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
+          tags: |
+            type=edge
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
