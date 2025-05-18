@@ -71,16 +71,40 @@ jobs:
       - run: GOOS=freebsd GOARCH=riscv64 go build -o mailweave-freebsd-riscv64 -ldflags="-s -w -X 'main.version=$(git describe --tags --always)'" ./cmd/
       - uses: actions/upload-artifact@v4
         with:
-          path: |
-            mailweave-linux-amd64
-            mailweave-linux-arm64
-            mailweave-linux-riscv64
-            mailweave-linux-arm
-            mailweave-linux-ppc64le
-            mailweave-linux-s390x
-            mailweave-freebsd-amd64
-            mailweave-freebsd-arm64
-            mailweave-freebsd-riscv64
+          name: mailweave-linux-amd64
+          path: mailweave-linux-amd64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-linux-arm64
+          path: mailweave-linux-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-linux-riscv64
+          path: mailweave-linux-riscv64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-linux-arm
+          path: mailweave-linux-arm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-linux-ppc64le
+          path: mailweave-linux-ppc64le
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-linux-s390x
+          path: mailweave-linux-s390x
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-freebsd-amd64
+          path: mailweave-freebsd-amd64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-freebsd-arm64
+          path: mailweave-freebsd-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mailweave-freebsd-riscv64
+          path: mailweave-freebsd-riscv64
 
   build-docker:
     name: Build Docker
