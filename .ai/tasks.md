@@ -9,7 +9,7 @@ This document contains a detailed list of actionable improvement tasks for the M
 3. [ ] Create a unified configuration management system with validation
 4. [ ] Implement a dependency injection pattern for better testability
 5. [ ] Design and implement a proper database schema for storing DMARC and TLS-RPT reports
-6. [ ] Add database migrations system for schema versioning
+6. [ ] Add a database migrations system for schema versioning
 7. [ ] Implement a proper middleware chain for HTTP handlers (authentication, logging, etc.)
 8. [ ] Create a structured API response format with proper error handling
 

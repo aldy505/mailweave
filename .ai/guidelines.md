@@ -140,7 +140,7 @@ When adding new tests, you can use these existing samples or add new ones as nee
 
 ### Code Structure
 
-The project follows standard Go package organization:
+The project follows the standard Go package organization:
 
 - `cmd/` - Main application entry points
 - `datastore/` - Database and storage interfaces
